@@ -75,7 +75,7 @@ export const login = async (req, res) => {
         message: "you are not registered",
       })
     } else {
-      const { password: hashPassword, ...userWithoutPassword } = isUserExist
+      const { _id: _id, password: hashPassword, ...userWithoutPassword } = isUserExist
       //if user exist then match the password by comparing
       bcrypt.compare(password, hashPassword || "").then((passwordMatch) => {
         //on password match
