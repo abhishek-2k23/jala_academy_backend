@@ -11,11 +11,12 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 // Allow requests from your frontend origin
-app.use(cors({
-  origin: '*', // Frontend URL
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+
+const corsOptions = {
+  origin: "http://127.0.0.1:5173",
+  credentials: true, // Allow credentials
+};
+app.use(cors(corsOptions));
 
 //connect db
 dbConnect();

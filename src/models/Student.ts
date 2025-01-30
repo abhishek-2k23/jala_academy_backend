@@ -4,10 +4,9 @@ import mongoose from 'mongoose';
 const studentSchema = new mongoose.Schema(
   {
     id: {
-      type: Number,
+      type: String,
       unique: true,
       required: true,
-      autoIncrement: true,
     },
     name: {
       type: String,
@@ -25,7 +24,7 @@ const studentSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['STUDENT'], // Keeping it simple for now
+      enum: ['JOB_SEEKER', 'PAID_INTERN' , 'UNPAID_INTERN' , 'STUDENT' , 'LEARNER'], // Keeping it simple for now
       required: true,
     },
     amountPaid: {
@@ -80,13 +79,6 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Middleware to auto-increment the `id` field
-studentSchema.pre('save', async function (next) {
-  const Student = mongoose.model('Student');
-  const lastStudent = await Student.findOne().sort({ id: -1 }).lean();
-  this.id = lastStudent ? lastStudent.id + 1 : 1;
-  next();
-});
 
 // Export the Student model
 const Student = mongoose.model('Student', studentSchema);
