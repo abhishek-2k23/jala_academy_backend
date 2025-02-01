@@ -1,6 +1,16 @@
-import mongoose from "mongoose"
+import mongoose, { Schema, Document } from "mongoose";
 
-const userSchema = new mongoose.Schema({
+// Define the User interface extending mongoose.Document
+interface IUser extends Document {
+  id?: number; // Optional because it's not marked as required in the schema
+  email: string;
+  password: string;
+  name: string;
+  role?: "ADMIN" | "STUDENT"; // Optional because it's not marked as required in the schema
+}
+
+// Define the User schema
+const userSchema: Schema<IUser> = new mongoose.Schema({
   id: {
     type: Number,
   },
@@ -17,9 +27,11 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   role: {
+    type: String,
     enum: ["ADMIN", "STUDENT"],
   },
-})
+});
 
-const User = mongoose.model("User", userSchema)
-export default User
+// Export the User model
+const User = mongoose.model<IUser>("User", userSchema);
+export default User;

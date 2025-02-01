@@ -1,7 +1,28 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document } from "mongoose";
+
+// Define the Student interface extending mongoose.Document
+interface IStudent extends Document {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  email: string;
+  type: "JOB_SEEKER" | "PAID_INTERN" | "UNPAID_INTERN" | "STUDENT" | "LEARNER";
+  amountPaid: number;
+  dueAmount: number;
+  discount: number;
+  dateOfJoining: Date;
+  incentivesPaid: number;
+  country: string;
+  state: string;
+  address: string;
+  governmentIdProof: string;
+  activityStatus: "ACTIVE" | "INACTIVE";
+  inactiveOn?: Date;
+  inactivityReason?: string;
+}
 
 // Define the Student schema
-const studentSchema = new mongoose.Schema(
+const studentSchema: Schema<IStudent> = new mongoose.Schema(
   {
     id: {
       type: String,
@@ -24,7 +45,7 @@ const studentSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['JOB_SEEKER', 'PAID_INTERN' , 'UNPAID_INTERN' , 'STUDENT' , 'LEARNER'], // Keeping it simple for now
+      enum: ["JOB_SEEKER", "PAID_INTERN", "UNPAID_INTERN", "STUDENT", "LEARNER"],
       required: true,
     },
     amountPaid: {
@@ -66,8 +87,8 @@ const studentSchema = new mongoose.Schema(
     },
     activityStatus: {
       type: String,
-      enum: ['ACTIVE', 'INACTIVE'],
-      default: 'ACTIVE',
+      enum: ["ACTIVE", "INACTIVE"],
+      default: "ACTIVE",
     },
     inactiveOn: {
       type: Date,
@@ -79,7 +100,6 @@ const studentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
 // Export the Student model
-const Student = mongoose.model('Student', studentSchema);
+const Student = mongoose.model<IStudent>("Student", studentSchema);
 export default Student;
