@@ -1,6 +1,29 @@
-import Student from "../models/Student.js"
+import { Request, Response } from "express";
+import Student from "../models/Student.js";
 
-export const createStudent = async (req, res) => {
+// Define a type for the Student object
+interface IStudent {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  email: string;
+  type: string;
+  amountPaid?: number;
+  dueAmount?: number;
+  discount?: number;
+  dateOfJoining: string;
+  incentivesPaid?: number;
+  country: string;
+  state: string;
+  address: string;
+  governmentIdProof: string;
+  activityStatus?: string;
+  inactiveOn?: string;
+  inactivityReason?: string;
+}
+
+// Create Student Controller
+export const createStudent = async (req: Request, res: Response) => {
   try {
     const {
       id,
@@ -20,7 +43,7 @@ export const createStudent = async (req, res) => {
       activityStatus,
       inactiveOn,
       inactivityReason,
-    } = req.body
+    }: IStudent = req.body;
 
     // Validate required fields
     if (
@@ -38,19 +61,19 @@ export const createStudent = async (req, res) => {
       return res.status(400).json({
         status: false,
         message: "Missing required fields",
-      })
+      });
     }
 
     // Check if phoneNumber or email is already registered
     const existingStudent = await Student.findOne({
       $or: [{ phoneNumber }, { email }],
-    })
+    });
 
     if (existingStudent) {
       return res.status(409).json({
         status: false,
-        message: "Phone phoneNumber or email is already registered",
-      })
+        message: "Phone number or email is already registered",
+      });
     }
 
     // Create the new student object
@@ -72,113 +95,115 @@ export const createStudent = async (req, res) => {
       activityStatus,
       inactiveOn,
       inactivityReason,
-    })
-    console.log(newStudent)
+    });
+
     // Save the student to the database
-    const savedStudent = await newStudent.save()
+    const savedStudent = await newStudent.save();
 
     // Return success response
     return res.status(201).json({
-      status: true, 
+      status: true,
       message: "Student created successfully",
       studentData: savedStudent,
-    })
-  } catch (error) {
-    console.error("Error creating student:", error.message)
+    });
+  } catch (error: any) {
+    console.error("Error creating student:", error.message);
     return res.status(500).json({
       status: false,
       message: "Server error",
-    })
+    });
   }
-}
+};
 
-export const searchStudentWithNumber = async (req, res) => {
+// Search Student by Phone Number Controller
+export const searchStudentWithNumber = async (req: Request, res: Response) => {
   try {
-    const { phoneNumber } = req.params
-    if (
-      phoneNumber.length !== 12 ||
-      typeof parseInt(phoneNumber) !== "number"
-    ) {
+    const { phoneNumber } = req.params;
+
+    // Validate phone number format
+    if (phoneNumber.length !== 12 || isNaN(Number(phoneNumber))) {
       return res.status(403).json({
         status: false,
-        message: "not a correct phoneNumber",
-      })
+        message: "Not a correct phone number",
+      });
     }
 
-    const studentData = await Student.findOne({ phoneNumber })
-    //if no student
+    // Find student by phone number
+    const studentData = await Student.findOne({ phoneNumber });
+
+    // If no student found
     if (!studentData) {
       return res.status(404).json({
         status: false,
-        message: "No student found with this phone phoneNumber",
-      })
-    } else {
-      return res.status(200).json({
-        status: true,
-        message: "found student",
-        studentData,
-      })
+        message: "No student found with this phone number",
+      });
     }
-  } catch (e) {
-    console.log(e.message)
+
+    // Return student data
+    return res.status(200).json({
+      status: true,
+      message: "Found student",
+      studentData,
+    });
+  } catch (e: any) {
+    console.log(e.message);
     return res.status(500).json({
       status: false,
-      message: "server error",
-    })
+      message: "Server error",
+    });
   }
-}
+};
 
-export const getStudentData = (req, res) => {
+// Get All Students Controller
+export const getStudentData = (req: Request, res: Response) => {
   Student.find()
     .then((data) =>
-      res
-        .status(200)
-        .json({
-          status: true,
-          message: "fetched student data",
-          studentData: data,
-        }),
+      res.status(200).json({
+        status: true,
+        message: "Fetched student data",
+        studentData: data,
+      })
     )
-    .catch((e) => {
-      console.log(e.message)
-      return res
-        .status(500)
-        .json({ status: false, message: "error while fetching student data" })
-    })
-}
+    .catch((e: any) => {
+      console.log(e.message);
+      return res.status(500).json({
+        status: false,
+        message: "Error while fetching student data",
+      });
+    });
+};
 
-export const updateStudent = async (req, res) => {
-    try {
-        const { id } = req.params; // Extract student ID from URL params
-        const updateData = req.body; // Extract new data from request body
+// Update Student Controller
+export const updateStudent = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params; // Extract student ID from URL params
+    const updateData = req.body; // Extract new data from request body
 
-        // Check if student exists
-        const student = await Student.findById(id);
-        if (!student) {
-            return res.status(404).json({
-                status: false,
-                message: 'Student not found',
-            });
-        }
-
-        // Update student data while keeping the ID intact
-        const updatedStudent = await Student.findByIdAndUpdate(
-            id,
-            updateData,
-            { new: true, runValidators: true } // Return updated doc & validate changes
-        );
-
-        return res.status(200).json({
-            status: true,
-            message: 'Student updated successfully',
-            updatedStudentData: updatedStudent,
-        });
-
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({
-            status: false,
-            message: 'Server error',
-        });
+    // Check if student exists
+    const student = await Student.findById(id);
+    if (!student) {
+      return res.status(404).json({
+        status: false,
+        message: "Student not found",
+      });
     }
+
+    // Update student data while keeping the ID intact
+    const updatedStudent = await Student.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true, // Return updated doc & validate changes
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Student updated successfully",
+      updatedStudentData: updatedStudent,
+    });
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({
+      status: false,
+      message: "Server error",
+    });
+  }
 };

@@ -1,12 +1,22 @@
 import express from "express";
 import { login, register } from "../controllers/Auth";
-import {createStudent, getStudentData, searchStudentWithNumber, updateStudent} from '../controllers/Student'
+import {
+  createStudent,
+  getStudentData,
+  searchStudentWithNumber,
+  updateStudent,
+} from "../controllers/Student";
+
 const router = express.Router();
 
-router.post('/user/register', register);
-router.post('/user/login', login);
-router.post('/student/create', createStudent);
-router.put('/student/update/:id', updateStudent);
-router.get('/student/searchWithPhoneNumber/:phoneNumber', searchStudentWithNumber);
-router.get('/student/getStudentData', getStudentData);
+// Auth Routes
+router.post("/user/register", register as any);
+router.post("/user/login", login as any);
+
+// Student Routes
+router.post("/student/create", createStudent as any);
+router.put("/student/update/:id", updateStudent as any);
+router.get("/student/searchWithPhoneNumber/:phoneNumber", searchStudentWithNumber as any);
+router.get("/student/getStudentData", getStudentData as any);
+
 export default router;

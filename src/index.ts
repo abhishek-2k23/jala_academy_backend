@@ -1,8 +1,9 @@
-import express from 'express';
-import dbConnect from './configuration/Db';
-import router from './routes/route';
-import cors from 'cors';
-import dotenv from 'dotenv'
+import express, { Request, Response } from "express";
+import dbConnect from "./configuration/Db";
+import router from "./routes/Route";
+import cors from "cors";
+import dotenv from "dotenv";
+
 dotenv.config();
 
 const app = express();
@@ -10,26 +11,26 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
-// Allow requests from your frontend origin
 
-const corsOptions = {
+// CORS configuration
+const corsOptions: cors.CorsOptions = {
   origin: "http://localhost:5173",
   credentials: true, // Allow credentials
 };
 app.use(cors(corsOptions));
 
-//connect db
+// Connect to the database
 dbConnect();
 
 // Test Route
-app.get('/', (req, res) => {
-  res.send('Hello, TypeScript with Express!');
+app.get("/", (req: Request, res: Response) => {
+  res.send("Hello, TypeScript with Express!");
 });
+
+// Mount routes
+app.use("/api", router);
 
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-//mount routes
-app.use('/api', router);
