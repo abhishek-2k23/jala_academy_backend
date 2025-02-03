@@ -1,5 +1,5 @@
 import express from "express";
-import { login, register } from "../controllers/Auth";
+import { login, registerMultipleUsers } from "../controllers/Auth";
 import {
   createStudent,
   getStudentData,
@@ -10,8 +10,8 @@ import {
 const router = express.Router();
 
 // Auth Routes
-router.post("/user/register", register as any);
 router.post("/user/login", login as any);
+router.post("/user/register", registerMultipleUsers as any);
 
 // Student Routes
 router.post("/student/create", createStudent as any);
