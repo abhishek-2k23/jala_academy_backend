@@ -10,6 +10,7 @@ interface IUser {
   email: string;
   password: string;
   name: string;
+  role: string;
 }
 
 //register multiple users
@@ -55,6 +56,7 @@ export const registerMultipleUsers = async (req: Request, res: Response) => {
       validUsers.push({
         ...user,
         password: encrypted_password,
+        role: "ADMIN"
       });
     }
 

@@ -6,7 +6,7 @@ interface IUser extends Document {
   email: string;
   password: string;
   name: string;
-  role?: "ADMIN" | "STUDENT"; // Optional because it's not marked as required in the schema
+  role?: "ADMIN";
 }
 
 // Define the User schema
@@ -28,7 +28,7 @@ const userSchema: Schema<IUser> = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["ADMIN", "STUDENT"],
+    enum: ["ADMIN"],
   },
 });
 
