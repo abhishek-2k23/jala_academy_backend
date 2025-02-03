@@ -7,55 +7,74 @@ dotenv.config();
 
 // Define a type for the User object
 interface IUser {
-  id?: string;
   email: string;
   password: string;
   name: string;
-  role?: string;
 }
 
-// Register Controller
-export const register = async (req: Request, res: Response) => {
+//register multiple users
+export const registerMultipleUsers = async (req: Request, res: Response) => {
   try {
-    const { id, email, password, name, role }: IUser = req.body;
+    const users: IUser[] = req.body; // Expect an array of user objects
 
-    // Check for required data
-    if (!name || !email || !password) {
+    // Check if the request body is an array
+    if (!Array.isArray(users)) {
       return res.status(400).json({
         status: false,
-        message: "Missing data",
+        message: "Expected an array of user data",
       });
     }
 
-    // Check for already registered user
-    const isUserExist = await User.findOne({ email });
-    if (isUserExist) {
-      return res.status(302).json({
+    // Validate each user in the array
+    const validUsers: IUser[] = [];
+    const duplicateEmails: string[] = [];
+
+    for (const user of users) {
+      const { email, password, name } = user;
+
+      // Check for required data
+      if (!name || !email || !password) {
+        return res.status(400).json({
+          status: false,
+          message: "Missing data for one or more users",
+        });
+      }
+
+      // Check for duplicate email
+      const isUserExist = await User.findOne({ email });
+      if (isUserExist) {
+        duplicateEmails.push(email);
+        continue; // Skip this user if duplicate
+      }
+
+      // Encrypt the password
+      const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10");
+      const encrypted_password = await bcrypt.hash(password, saltRounds);
+
+      // Add valid user to the list
+      validUsers.push({
+        ...user,
+        password: encrypted_password,
+      });
+    }
+
+    // If all users are duplicates, return an error
+    if (validUsers.length === 0 && duplicateEmails.length > 0) {
+      return res.status(400).json({
         status: false,
-        message: "You are already registered",
+        message: "All users already exist",
+        duplicateEmails,
       });
     }
 
-    // Encrypt the password
-    const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "10");
-    const encrypted_password = await bcrypt.hash(password, saltRounds);
-
-    // Create a new user instance
-    const updatedUser = new User({
-      id,
-      email,
-      password: encrypted_password,
-      name,
-      role,
-    });
-
-    // Save the user
-    const saved_user = await updatedUser.save();
+    // Save valid users to the database
+    const savedUsers = await User.insertMany(validUsers);
 
     return res.status(200).json({
       status: true,
-      message: "User created successfully",
-      user: saved_user,
+      message: "Users created successfully",
+      users: savedUsers,
+      duplicateEmails, // Return list of duplicate emails (if any)
     });
   } catch (e: any) {
     console.error(e.message);
